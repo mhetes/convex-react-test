@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { DropDownSelect } from './DropDownSelect';
 import { EstablishmentsTable } from "./EstablishmentsTable";
 import { EstablishmentsTableNavigation } from "./EstablishmentsTableNavigation";
 import { getEstablishmentRatings } from "../api/ratingsAPI";
+import { getCountriesDS, getAuthoritiesDS, type DataSource } from '../api/dataSource';
 
 const tableStyle = {
   background: "#82C7AF",
@@ -20,9 +22,24 @@ export const PaginatedEstablishmentsTable = () => {
   >([]);
   const [pageNum, setPageNum] = useState(1);
   const [pageCount] = useState(100);
+  const [countries, setCountries] = useState<DataSource[] | null>(null);
+  const [authorities, setAuthorities] = useState<DataSource[] | null>(null);
+  const [country, setCountry] = useState<string>('');
+  const [authority, setAuthority] = useState<string>('');
 
   useEffect(() => {
-    getEstablishmentRatings(pageNum).then(
+    getCountriesDS()
+      .then((data) => setCountries(data))
+      .catch((e) => console.error(e));
+    getAuthoritiesDS()
+      .then((data) => setAuthorities(data))
+      .catch((e) => console.error(e));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    getEstablishmentRatings(pageNum, country, authority).then(
       (result) => {
         setEstablishments(result?.establishments);
         setLoading(false);
@@ -32,37 +49,24 @@ export const PaginatedEstablishmentsTable = () => {
         setLoading(false);
       }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pageNum, country, authority]);
 
-  async function handlePreviousPage() {
-    setLoading(true);
+  function handlePreviousPage() {
     pageNum > 1 && setPageNum(pageNum - 1);
-    getEstablishmentRatings(pageNum).then(
-      (result) => {
-        setEstablishments(result.establishments);
-        setLoading(false);
-      },
-      (error) => {
-        setError(error);
-        setLoading(false);
-      }
-    );
   }
 
-  async function handleNextPage() {
-    setLoading(true);
+  function handleNextPage() {
     pageNum < pageCount && setPageNum(pageNum + 1);
-    getEstablishmentRatings(pageNum).then(
-      (result) => {
-        setEstablishments(result.establishments);
-        setLoading(false);
-      },
-      (error) => {
-        setError(error);
-        setLoading(false);
-      }
-    );
+  }
+
+  function handleChangeCountry(id: string) {
+    setCountry(id);
+    setPageNum(1);
+  }
+
+  function handleChangeAuthority(id: string) {
+    setAuthority(id);
+    setPageNum(1);
   }
 
   if (error) {
@@ -71,6 +75,20 @@ export const PaginatedEstablishmentsTable = () => {
     return (
       <div style={tableStyle}>
         <h2>Food Hygiene Ratings</h2>
+        <DropDownSelect
+          key='rt_countries'
+          defaultName='-- ALL COUNTRIES --'
+          data={countries}
+          disabled={loading}
+          onChange={handleChangeCountry}
+        />
+        <DropDownSelect
+          key='rt_authorities'
+          defaultName='-- ALL AUTHORITIES --'
+          data={authorities}
+          disabled={loading}
+          onChange={handleChangeAuthority}
+        />
         {loading ? <h3>Loading...</h3> : <EstablishmentsTable establishments={establishments} />}
         <EstablishmentsTableNavigation
           pageNum={pageNum}
