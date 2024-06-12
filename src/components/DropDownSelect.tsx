@@ -7,6 +7,7 @@ type DropDownSelectProps = {
     data: DataSource[] | null;
     disabled: boolean;
     onChange: (id: string) => void;
+    selected?: string;
 }
 
 export const DropDownSelect = ({...props}: DropDownSelectProps): JSX.Element => {
@@ -17,10 +18,10 @@ export const DropDownSelect = ({...props}: DropDownSelectProps): JSX.Element => 
             key={props.key}
             onChange={(evt) => props.onChange(evt.currentTarget.value)}
         >
-            <option value=''>{props.defaultName}</option>
+            <option value='' selected={props.selected === ''}>{props.defaultName}</option>
             {props.data && props.data.map((ds, i) => {
                 return (
-                    <option key={props.key + '_' + i} value={ds.id}>{ds.name}</option>
+                    <option key={props.key + '_' + i} value={ds.id} selected={props.selected === ds.id}>{ds.name}</option>
                 )
             })}
         </select>

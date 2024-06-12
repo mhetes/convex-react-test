@@ -4,6 +4,16 @@ import { EstablishmentsTable } from "./EstablishmentsTable";
 import { EstablishmentsTableNavigation } from "./EstablishmentsTableNavigation";
 import { getEstablishmentRatings } from "../api/ratingsAPI";
 import { getCountriesDS, getAuthoritiesDS, type DataSource } from '../api/dataSource';
+import {
+  getLSPageNum,
+  setLSPageNum,
+  getLSCountry,
+  setLSCountry,
+  getLSAuthority,
+  setLSAuthority,
+  listLSFavorites,
+  toggleLSFavorite,
+} from '../api/localStorage';
 
 const tableStyle = {
   background: "#82C7AF",
@@ -20,12 +30,12 @@ export const PaginatedEstablishmentsTable = () => {
   const [establishments, setEstablishments] = useState<
     { [key: string]: string }[]
   >([]);
-  const [pageNum, setPageNum] = useState(1);
+  const [pageNum, setPageNum] = useState(getLSPageNum());
   const [pageCount] = useState(100);
   const [countries, setCountries] = useState<DataSource[] | null>(null);
   const [authorities, setAuthorities] = useState<DataSource[] | null>(null);
-  const [country, setCountry] = useState<string>('');
-  const [authority, setAuthority] = useState<string>('');
+  const [country, setCountry] = useState<string>(getLSCountry());
+  const [authority, setAuthority] = useState<string>(getLSAuthority());
 
   useEffect(() => {
     getCountriesDS()
@@ -52,21 +62,40 @@ export const PaginatedEstablishmentsTable = () => {
   }, [pageNum, country, authority]);
 
   function handlePreviousPage() {
-    pageNum > 1 && setPageNum(pageNum - 1);
+    if (pageNum > 1) {
+      setPageNum(pageNum - 1);
+      setLSPageNum(pageNum - 1);
+    }
   }
 
   function handleNextPage() {
-    pageNum < pageCount && setPageNum(pageNum + 1);
+    if (pageNum < pageCount) {
+      setPageNum(pageNum + 1);
+      setLSPageNum(pageNum + 1);
+    }
   }
 
   function handleChangeCountry(id: string) {
     setCountry(id);
     setPageNum(1);
+    setLSCountry(id);
+    setLSPageNum(1);
   }
 
   function handleChangeAuthority(id: string) {
     setAuthority(id);
     setPageNum(1);
+    setLSAuthority(id);
+    setLSPageNum(1);
+  }
+
+  function handleSearchReset() {
+    setCountry('');
+    setAuthority('');
+    setPageNum(1);
+    setLSCountry('');
+    setLSAuthority('');
+    setLSPageNum(1);
   }
 
   if (error) {
@@ -81,6 +110,7 @@ export const PaginatedEstablishmentsTable = () => {
           data={countries}
           disabled={loading}
           onChange={handleChangeCountry}
+          selected={country}
         />
         <DropDownSelect
           key='rt_authorities'
@@ -88,7 +118,12 @@ export const PaginatedEstablishmentsTable = () => {
           data={authorities}
           disabled={loading}
           onChange={handleChangeAuthority}
+          selected={authority}
         />
+        <button
+          disabled={loading}
+          onClick={handleSearchReset}
+        >Reset search...</button>
         {loading ? <h3>Loading...</h3> : <EstablishmentsTable establishments={establishments} />}
         <EstablishmentsTableNavigation
           pageNum={pageNum}

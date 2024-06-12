@@ -45,7 +45,21 @@ export type AuthoritiesType = {
   links: Links[];
 }
 
-export function getEstablishmentRatings(
+export type EstablishmentDetailType = {
+  AddressLine1: string;
+  AddressLine2: string;
+  AddressLine3: string;
+  AddressLine4: string;
+  BusinessName: string;
+  BusinessType: string;
+  Phone: string;
+  PostCode: string;
+  RatingDate: string;
+  RatingValue: string;
+  [others: string]: string | number | object;
+};
+
+export async function getEstablishmentRatings(
   pageNum: number,
   country?: string,
   authority?: string,
@@ -65,16 +79,23 @@ export function getEstablishmentRatings(
   ).then((res) => res.json());
 }
 
-export function getAllCountries(): Promise<CountriesType> {
+export async function getAllCountries(): Promise<CountriesType> {
   return fetch(
     `http://api.ratings.food.gov.uk/Countries/basic`,
     { headers: { "x-api-version": "2" } },
   ).then((res) => res.json());
 }
 
-export function getAllAuthorities(): Promise<AuthoritiesType> {
+export async function getAllAuthorities(): Promise<AuthoritiesType> {
   return fetch(
     `http://api.ratings.food.gov.uk/Authorities/basic`,
+    { headers: { "x-api-version": "2" } },
+  ).then((res) => res.json());
+}
+
+export async function getEstablishmentDetail(id: string): Promise<EstablishmentDetailType> {
+  return fetch(
+    `http://api.ratings.food.gov.uk/Establishments/${id}`,
     { headers: { "x-api-version": "2" } },
   ).then((res) => res.json());
 }
