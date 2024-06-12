@@ -1,6 +1,8 @@
 import React from "react";
 import { EstablishmentsTableRow } from "./EstablishmentsTableRow";
 import PropTypes from "prop-types";
+import { type FavoritesType } from "../api/localStorage";
+import { type EstablishmentsBase } from "../api/ratingsAPI";
 
 const headerStyle: { [key: string]: string | number } = {
   paddingBottom: "10px",
@@ -9,8 +11,10 @@ const headerStyle: { [key: string]: string | number } = {
 };
 
 export const EstablishmentsTable: React.FC<{
-  establishments: { [key: string]: string }[] | null | undefined;
-}> = ({ establishments }) => {
+  establishments: EstablishmentsBase[] | null | undefined;
+  favorites: FavoritesType[];
+  toggleFavorite: (favorite: FavoritesType) => void;
+}> = ({ establishments, favorites, toggleFavorite }) => {
   return (
     <table>
       <tbody>
@@ -21,12 +25,14 @@ export const EstablishmentsTable: React.FC<{
         {establishments &&
           establishments?.map(
             (
-              establishment: { [key: string]: string } | null | undefined,
+              establishment: EstablishmentsBase,
               index: React.Key | null | undefined
             ) => (
               <EstablishmentsTableRow
                 key={index}
                 establishment={establishment}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
               />
             )
           )}

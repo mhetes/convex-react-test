@@ -14,8 +14,14 @@ type Links = {
   href: string;
 }
 
+export type EstablishmentsBase = {
+  FHRSID: number;
+  BusinessName: string;
+  RatingValue: string;
+}
+
 export type EstablishmentsType = {
-  establishments: {}[];
+  establishments: EstablishmentsBase[];
   meta: Metadata;
   links: Links[];
 };

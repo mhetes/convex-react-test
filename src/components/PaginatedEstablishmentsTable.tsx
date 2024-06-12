@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { DropDownSelect } from './DropDownSelect';
 import { EstablishmentsTable } from "./EstablishmentsTable";
 import { EstablishmentsTableNavigation } from "./EstablishmentsTableNavigation";
-import { getEstablishmentRatings } from "../api/ratingsAPI";
+import { EstablishmentsBase, getEstablishmentRatings } from "../api/ratingsAPI";
 import { getCountriesDS, getAuthoritiesDS, type DataSource } from '../api/dataSource';
 import {
   getLSPageNum,
@@ -13,6 +13,7 @@ import {
   setLSAuthority,
   listLSFavorites,
   toggleLSFavorite,
+  FavoritesType,
 } from '../api/localStorage';
 
 const tableStyle = {
@@ -27,15 +28,14 @@ export const PaginatedEstablishmentsTable = () => {
   const [error, setError] =
     useState<{ message: string; [key: string]: string }>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [establishments, setEstablishments] = useState<
-    { [key: string]: string }[]
-  >([]);
+  const [establishments, setEstablishments] = useState<EstablishmentsBase[]>([]);
   const [pageNum, setPageNum] = useState(getLSPageNum());
   const [pageCount] = useState(100);
   const [countries, setCountries] = useState<DataSource[] | null>(null);
   const [authorities, setAuthorities] = useState<DataSource[] | null>(null);
   const [country, setCountry] = useState<string>(getLSCountry());
   const [authority, setAuthority] = useState<string>(getLSAuthority());
+  const [favorites, setFavorites] = useState<FavoritesType[]>(listLSFavorites());
 
   useEffect(() => {
     getCountriesDS()
@@ -98,6 +98,11 @@ export const PaginatedEstablishmentsTable = () => {
     setLSPageNum(1);
   }
 
+  function handleToggleFavorite(favorite: FavoritesType) {
+    const favorites = toggleLSFavorite(favorite);
+    setFavorites(favorites);
+  }
+
   if (error) {
     return <div>Error: {error.message}</div>;
   } else {
@@ -124,7 +129,7 @@ export const PaginatedEstablishmentsTable = () => {
           disabled={loading}
           onClick={handleSearchReset}
         >Reset search...</button>
-        {loading ? <h3>Loading...</h3> : <EstablishmentsTable establishments={establishments} />}
+        {loading ? <h3>Loading...</h3> : <EstablishmentsTable establishments={establishments} favorites={favorites} toggleFavorite={handleToggleFavorite} />}
         <EstablishmentsTableNavigation
           pageNum={pageNum}
           pageCount={pageCount}
@@ -132,6 +137,21 @@ export const PaginatedEstablishmentsTable = () => {
           onPreviousPage={handlePreviousPage}
           onNextPage={handleNextPage}
         />
+        <h1>Favorites:</h1>
+        <table>
+          <thead>
+            <td>Name</td>
+            <td>Remove</td>
+          </thead>
+          {favorites.map((fav) => {
+            return (
+              <tr>
+                <td>{fav.name}</td>
+                <td><button onClick={() => { handleToggleFavorite(fav); }}>Remove</button></td>
+              </tr>
+            )
+          })}
+        </table>
       </div>
     );
   }
