@@ -5,6 +5,7 @@ const buttonStyle = {
 type EstablishmentsTableNavigationType = {
   pageNum: number;
   pageCount: number;
+  disabled: boolean;
   onPreviousPage: () => void;
   onNextPage: () => void;
 };
@@ -19,7 +20,7 @@ export const EstablishmentsTableNavigation = (
         <button
           type="button"
           style={buttonStyle}
-          disabled={pageNum <= 1}
+          disabled={props.disabled || pageNum <= 1}
           onClick={onPreviousPage}
         >
           -
@@ -30,7 +31,7 @@ export const EstablishmentsTableNavigation = (
         <button
           type="button"
           style={buttonStyle}
-          disabled={pageNum >= pageCount}
+          disabled={props.disabled || pageNum >= pageCount}
           onClick={onNextPage}
         >
           +
